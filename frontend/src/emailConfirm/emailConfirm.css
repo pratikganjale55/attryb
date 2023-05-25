@@ -1,0 +1,17 @@
+.emailConfirmDiv{
+    width: 50%;
+    margin: auto;
+}
+.custom-icon {
+    font-size: 100;
+    color: green;
+    display: flex;
+  align-items: center;
+  justify-content: center;
+  }
+  .emailConfirm_flex{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2%;
+  }

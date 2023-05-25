@@ -59,4 +59,19 @@ oemSpecRoute.get("/singleOemSpec", async (req, res) => {
     return res.status(500).send({ message: "Internal server error" });
   }
 });
+oemSpecRoute.get("/allOemSpec", async (req, res) => {
+    try {
+      const items = await oenSpecData.find();
+      if (items.length === 0) {
+        return res.status(404).send({
+          message: "No data found",
+        });
+      }
+  
+      return res.status(200).send(items);
+    } catch (error) {
+      console.log(error)
+      return res.status(500).send({ message: "Internal server error" });
+    }
+  });
 module.exports = oemSpecRoute;
