@@ -154,8 +154,8 @@ authRoute.post("/login", async (req, res) => {
   console.log("login successful");
   res.status(201).send({
     message: "Login successful",
-    token,
     userDetails: {
+      token,
       userName: validUser.name,
       id: validUser._id,
       role: validUser.role,
