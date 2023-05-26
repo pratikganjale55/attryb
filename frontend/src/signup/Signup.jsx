@@ -8,8 +8,10 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import "./signup.css";
+import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -62,6 +64,7 @@ const Signup = () => {
             password: "",
             rePassword: "",
           });
+          navigate("/")
         } 
         else {
           throw new Error("Signup failed");
@@ -172,10 +175,7 @@ const Signup = () => {
             <Button type="submit" fullWidth variant="contained" color="primary">
               Sign Up
             </Button>
-            <p>Already have an account? Let's Login</p>
-            <Button type="submit" fullWidth variant="contained" color="success">
-              Login
-            </Button>
+            
           </form>
         </div>
       </Container>

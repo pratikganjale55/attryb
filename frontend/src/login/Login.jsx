@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import "./login.css" ;
 import { Alert, Container, TextField, Typography, Button} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/Appcontext';
 
 
 const Login = () => {
    const navigate = useNavigate()
+  const {login} = useContext(AuthContext)
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -54,6 +56,7 @@ const Login = () => {
                   setAlertSeverity("info");
             }
             if (data.message == "Login successful") {
+              localStorage.setItem("authDetails", JSON.stringify(data.userDetails));
               setAlertMessage(
                 "Login successful."
               );
@@ -64,6 +67,8 @@ const Login = () => {
                 password: "",
                 rePassword: "",
               });
+              
+              login()
               navigate("/homepage")
             } 
             else {
@@ -74,6 +79,9 @@ const Login = () => {
             console.error(error);
           });
       };
+      const handleSignUpPage= () => {
+        navigate("/signup")
+      }
       useEffect(() => {
         if (alertMessage) {
           const timer = setTimeout(() => {
@@ -133,6 +141,10 @@ const Login = () => {
             
             <Button type="submit" fullWidth variant="contained" color="primary">
               Login
+            </Button>
+            <p>Don't have an account? Let's Signup</p>
+            <Button type="submit" fullWidth variant="contained" color="success" onClick={handleSignUpPage}>
+              Signup
             </Button>
           </form>
         </div>

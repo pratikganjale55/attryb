@@ -36,7 +36,7 @@ const EmailConfirm = () => {
             Your email has been successfully verified.<br/> Thank you for joining
             Attryb <br/> You can now log in and start using our
             platform <br/><br/>
-            <Link to="/login">
+            <Link to="/">
             <Button variant="contained" color="secondary">Login</Button>
             </Link>
             
