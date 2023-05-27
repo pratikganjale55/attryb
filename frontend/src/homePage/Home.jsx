@@ -1,23 +1,30 @@
-import { Autocomplete, Box, Button, Modal, TextField, Typography } from "@mui/material";
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Modal,
+  TextField,
+  Typography,
+} from "@mui/material";
 import React, { useEffect, useState } from "react";
 import "./home.css";
 import { DataGrid } from "@mui/x-data-grid";
 import InventoryModal from "./InventoryModal";
 
-
-
-
 const Home = () => {
+  let authDetailsId = JSON.parse(localStorage.getItem("authDetails"));
+  let token = authDetailsId.token;
   const [options, setOptions] = useState([]);
   const [searchValue, setSearchValue] = useState("");
   const [OEMData, setOenData] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-  const [isSearch, setIssearch] = useState(false)
+  const [isSearch, setIssearch] = useState(false);
 
   const columns = [
     { field: "id", headerName: "ID", width: 90 },
     { field: "model_name", headerName: "Model_name", width: 200 },
+    { field: "year", headerName: "Year", width: 90 },
     { field: "list_price", headerName: "List_price", width: 90 },
     { field: "colors", headerName: "Colors", width: 250 },
     { field: "mileage", headerName: "Mileage", width: 100 },
@@ -43,6 +50,7 @@ const Home = () => {
     OEMData.map((data, i) => ({
       id: i + 1,
       model_name: data.model_name,
+      year : data.year ,
       list_price: data.list_price,
       colors: data.colors,
       mileage: data.mileage,
@@ -63,8 +71,12 @@ const Home = () => {
     setOpenModal(false);
   };
   const hanleSearch = () => {
-    setIssearch(true)
-    fetch(`http://localhost:8080/oem/singleOemSpec?model_name=${searchValue}`)
+    setIssearch(true);
+    fetch(`http://localhost:8080/oem/singleOemSpec?model_name=${searchValue}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+      })
       .then((response) => response.json())
       .then((data) => {
         setOenData(data);
@@ -73,9 +85,13 @@ const Home = () => {
         console.error(error);
       });
   };
-  
+
   useEffect(() => {
-    fetch("http://localhost:8080/oem/allOemSpec")
+    fetch("http://localhost:8080/oem/allOemSpec",{
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
       .then((response) => response.json())
       .then((data) => {
         setOptions(data);
@@ -92,9 +108,9 @@ const Home = () => {
         <div>
           <Autocomplete
             id="grouped-demo"
-            options={options.sort(
+            options={Array.isArray(options) ?options.sort(
               (a, b) => -b.model_name.localeCompare(a.model_name)
-            )}
+            ) : []}
             groupBy={(option) => option.year}
             getOptionLabel={(option) => option.model_name}
             sx={{ width: 400 }}
@@ -124,20 +140,23 @@ const Home = () => {
           </Button>
         </div>
       </div>
-      {isSearch ? <div>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          pageSize={5}
-          checkboxSelection
-        />
-        <InventoryModal
-          open={openModal}
-          handleClose={handleCloseModal}
-          rowData={selectedRow}
-        />
-      </div> : "No any data"
-}
+      {isSearch ? (
+        <div>
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            pageSize={5}
+            // checkboxSelection
+          />
+          <InventoryModal
+            open={openModal}
+            handleClose={handleCloseModal}
+            rowData={selectedRow}
+          />
+        </div>
+      ) : (
+        "No any data search categories"
+      )}
     </>
   );
 };

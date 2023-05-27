@@ -19,6 +19,7 @@ const selectedCardStyle = {
 const MarketPlace = () => {
     let authDetailsId = JSON.parse(localStorage.getItem("authDetails"));
     let userId = authDetailsId.id;
+    let token = authDetailsId.token;
   const [inventrydata, setInventryData] = useState([]);
   const [filters, setFilters] = useState({
     filterBy: "",
@@ -70,6 +71,7 @@ const MarketPlace = () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify(selectedCards),
     })
@@ -103,7 +105,11 @@ const MarketPlace = () => {
 
   function getInventryData() {
     console.log(userId)
-    fetch(`http://localhost:8080/inventry/allInventry/${userId}`)
+    fetch(`http://localhost:8080/inventry/allInventry/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+      })
       .then((res) => res.json())
       .then((data) => {
         setInventryData(data);

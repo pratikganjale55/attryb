@@ -13,6 +13,9 @@ const EditMarketInventry = ({
   selectedInventry,
   handleCloseModal,
 }) => {
+  let authDetailsId = JSON.parse(localStorage.getItem("authDetails"));
+  let userId = authDetailsId.id;
+  let token = authDetailsId.token;
   const [editedInventry, setEditedInventry] = useState({});
   const [alertMessage, setAlertMessage] = useState("");
   const [alertSeverity, setAlertSeverity] = useState("");
@@ -43,42 +46,36 @@ const EditMarketInventry = ({
 
   const handleEditSubmit = (e) => {
     e.preventDefault();
-    fetch(`http://localhost:8080/inventry/updateInventry/${selectedInventry._id}`, {
+    fetch(
+      `http://localhost:8080/inventry/updateInventry/${selectedInventry._id}`,
+      {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(editedInventry),
+      }
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        if (data.message == "Inventory item not found") {
+          setAlertMessage(data.message);
+          setAlertSeverity("info");
+        }
+        if (data.message == "Internal server error") {
+          setAlertMessage("Internal server error");
+          setAlertSeverity("error");
+        }
+        if (data.message == "Data edit successfully") {
+          setAlertMessage("Data edit successfully");
+          setAlertSeverity("success");
+        }
       })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log(data);
-          if (
-            data.message ==
-            "Inventory item not found"
-          ) {
-            setAlertMessage(data.message);
-            setAlertSeverity("info");
-          }
-          if(data.message == "Internal server error"){
-              setAlertMessage(
-                  "Internal server error"
-                );
-                setAlertSeverity("error");
-          }
-          if (data.message == "Data edit successfully") {
-            setAlertMessage(
-                "Data edit successfully"
-            );
-            setAlertSeverity("success");
-            
-          } 
-         
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    
+      .catch((error) => {
+        console.error(error);
+      });
   };
   useEffect(() => {
     setEditedInventry(selectedInventry);
@@ -88,12 +85,12 @@ const EditMarketInventry = ({
       <Modal open={openInventry} onClose={handleCloseModal}>
         <Box sx={{ width: 450, bgcolor: "background.paper", p: 2 }}>
           {alertMessage && (
-        <Alert severity={alertSeverity} onClose={() => setAlertMessage("")}>
-          {alertMessage}
-        </Alert>
-      )}
+            <Alert severity={alertSeverity} onClose={() => setAlertMessage("")}>
+              {alertMessage}
+            </Alert>
+          )}
           <Typography variant="h6" component="h2" margin="normal">
-           Update Inventory Details
+            Update Inventory Details
           </Typography>
           <br />
           <div style={{ maxHeight: "80vh", overflowY: "auto" }}>
@@ -111,8 +108,11 @@ const EditMarketInventry = ({
                 margin="normal"
                 name="bullet_points"
                 label="Description  (comma-separated)"
-                value={ Array.isArray(editedInventry.bullet_points)
-                    ? editedInventry.bullet_points.map((point) => point.point).join(", ")
+                value={
+                  Array.isArray(editedInventry.bullet_points)
+                    ? editedInventry.bullet_points
+                        .map((point) => point.point)
+                        .join(", ")
                     : ""
                 }
                 onChange={handleChange}

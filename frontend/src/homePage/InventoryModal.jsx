@@ -5,8 +5,9 @@ import { AuthContext } from "../context/Appcontext";
 
 const InventoryModal = ({ open, handleClose, rowData }) => {
     let authDetailsId = JSON.parse(localStorage.getItem("authDetails"));
-    let userId = +authDetailsId.id;
-    // console.log(userId)
+    let userId = authDetailsId.id;
+    let token = authDetailsId.token;
+    console.log(userId)
   const [formValues, setFormValues] = useState({
     image: null,
     bullet_points: [],
@@ -58,6 +59,7 @@ const InventoryModal = ({ open, handleClose, rowData }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(formValues),
       })
