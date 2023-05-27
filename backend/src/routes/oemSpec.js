@@ -10,9 +10,13 @@ function properName(name) {
 
 oemSpecRoute.post("/oemSpec", async (req, res) => {
   try {
+    const token = req.headers["authorization"]?.split(" ")[1];
+    if (!token) {
+      return res.status(401).send({ message: "Unauthorized" });
+    }
     const { model_name, year, list_price, colors, mileage, power, max_speed } =
       req.body;
- 
+
     if (
       !model_name ||
       !year ||
@@ -38,8 +42,12 @@ oemSpecRoute.post("/oemSpec", async (req, res) => {
 
 oemSpecRoute.get("/singleOemSpec", async (req, res) => {
   try {
+    const token = req.headers["authorization"]?.split(" ")[1];
+    if (!token) {
+      return res.status(401).send({ message: "Unauthorized" });
+    }
     const { model_name } = req.query;
-   
+
     const properModelNameFormat = properName(model_name);
     let queryObj = {};
     if (properModelNameFormat) {
@@ -55,23 +63,27 @@ oemSpecRoute.get("/singleOemSpec", async (req, res) => {
 
     return res.status(200).send(items);
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(500).send({ message: "Internal server error" });
   }
 });
 oemSpecRoute.get("/allOemSpec", async (req, res) => {
-    try {
-      const items = await oenSpecData.find();
-      if (items.length === 0) {
-        return res.status(404).send({
-          message: "No data found",
-        });
-      }
-  
-      return res.status(200).send(items);
-    } catch (error) {
-      console.log(error)
-      return res.status(500).send({ message: "Internal server error" });
+  try {
+    const token = req.headers["authorization"]?.split(" ")[1];
+    if (!token) {
+      return res.status(401).send({ message: "Unauthorized" });
     }
-  });
+    const items = await oenSpecData.find();
+    if (items.length === 0) {
+      return res.status(404).send({
+        message: "No data found",
+      });
+    }
+
+    return res.status(200).send(items);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({ message: "Internal server error" });
+  }
+});
 module.exports = oemSpecRoute;

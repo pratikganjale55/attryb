@@ -2,14 +2,19 @@ const Router = require("express");
 const inventryRoute = Router();
 const inventryData = require("../models/MarketplaceInventoryModel");
 const oemSpecdata = require("../models/oemModel");
-const multer = require('multer');
 
+const jwt = require("jsonwebtoken");
 // Set up Multer storage
 
 
 inventryRoute.post("/addInventry/:model_id", async (req, res) => {
   try {
     console.log(req.body)
+    const token = req.headers["authorization"]?.split(" ")[1];
+    if (!token) {
+      return res.status(401).send({ message: "Unauthorized" });
+    }
+    const { userId } = jwt.verify(token, process.env.JWT_KEY);
     const { model_id } = req.params;
     const { 
      image,
@@ -20,8 +25,8 @@ inventryRoute.post("/addInventry/:model_id", async (req, res) => {
       original_paint,
       accidents_reported,
       previous_buyers,
-      registration_place,
-      userId
+      registration_place
+     
     } = req.body;
 //   console.log(req.body, model_id)
     const oemSpec = await oemSpecdata.findById(model_id);
@@ -52,7 +57,10 @@ inventryRoute.post("/addInventry/:model_id", async (req, res) => {
 });
 inventryRoute.get("/allInventry/:userId", async (req, res) => {
   try {
-   
+    const token = req.headers["authorization"]?.split(" ")[1];
+    if (!token) {
+      return res.status(401).send({ message: "Unauthorized" });
+    }
     const {userId} = req.params;
     console.log(userId)
     const inventory = await inventryData
@@ -74,6 +82,10 @@ inventryRoute.get("/allInventry/:userId", async (req, res) => {
 
 inventryRoute.patch("/updateInventry/:id", async (req, res) => {
   try {
+    const token = req.headers["authorization"]?.split(" ")[1];
+    if (!token) {
+      return res.status(401).send({ message: "Unauthorized" });
+    }
     const { id } = req.params;
     const updateFields = req.body;
 
@@ -96,6 +108,10 @@ inventryRoute.patch("/updateInventry/:id", async (req, res) => {
 
 inventryRoute.post("/deleteInventry", async (req, res) => {
   try {
+    const token = req.headers["authorization"]?.split(" ")[1];
+    if (!token) {
+      return res.status(401).send({ message: "Unauthorized" });
+    }
     const  ids  = req.body;
 
     if (!Array.isArray(ids) || ids.length === 0) {

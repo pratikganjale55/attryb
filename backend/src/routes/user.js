@@ -141,7 +141,7 @@ authRoute.post("/login", async (req, res) => {
   const token = jwt.sign(
     {
       email: validUser.email,
-      role: validUser.role,
+      userId : validUser._id
     },
     process.env.JWT_KEY
   );
@@ -157,89 +157,14 @@ authRoute.post("/login", async (req, res) => {
     userDetails: {
       token,
       userName: validUser.name,
-      id: validUser._id,
-      role: validUser.role,
+      id: validUser._id
+     
     },
   });
 });
 
-authRoute.post("/forgetPassword", async (req, res) => {
-  const { email } = req.body;
-  const user = await userModel.findOne({ email });
 
-  if (!user) {
-    return res
-      .status(401)
-      .send({ message: "No user found with this email address" });
-  }
 
-  // Generate a password reset token and expiry time
-  const resetToken = jwt.sign({ userId: user._id }, "Secret", {
-    expiresIn: "15m",
-  });
 
-  // Set up the email transporter
-  const directory = path.join(__dirname, "..", "utils", "resetPassword.html");
-  const fileRead = fs.readFileSync(directory, "utf-8");
-  const template = handlebars.compile(fileRead);
-  const htmlToSend = template({ name: user.name, userId: user._id });
-
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.USER_EMAIL,
-      pass: process.env.USER_PASS,
-    },
-  });
-
-  // Compose the email
-  const mailOptions = {
-    from: process.env.USER_EMAIL,
-    to: email,
-    subject: "Password Reset Request",
-    html: htmlToSend,
-  };
-
-  // Send the email
-  transporter.sendMail(mailOptions, (err, info) => {
-    if (err) {
-      console.log("error sending email", { error: err });
-      return res.status(500).send({ message: "Error sending email" });
-    }
-    console.log("email sent for reset your password");
-    return res.status(200).send({ message: "Password reset email sent" });
-  });
-});
-
-//reset password
-authRoute.patch("/resetPassword/:id", async (req, res) => {
-  const { id } = req.params;
-  const { password, rePassword } = req.body;
-
-  const oldUser = await userModel.findOne({ _id: id });
-  if (!oldUser) {
-    console.log("user not found");
-    return res.json({ status: "User Not Exists!!" });
-  }
-  if (password !== rePassword) {
-    return res.status(401).send({ message: "Password not same " });
-  }
-  try {
-    const salt = await bcrypt.genSaltSync(10);
-    const Pass = await bcrypt.hash(password, salt);
-    const rePass = await bcrypt.hash(rePassword, salt);
-
-    const setNewPass = await userModel.findByIdAndUpdate(
-      { _id: id },
-      { $set: { password: Pass, rePassword: rePass } }
-    );
-    setNewPass.save();
-    console.log("pass updated successfully");
-    res.status(201).send({ message: "Password updated successfully" });
-  } catch (error) {
-    console.log("password not updated", { error: err });
-    res.json({ status: "Something Went Wrong" });
-  }
-});
 
 module.exports = authRoute;
